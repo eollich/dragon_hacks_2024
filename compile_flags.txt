@@ -1,0 +1,6 @@
+-Iinclude
+-std=c++17
+-I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include/mongocxx/v_noabi
+-I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include
+-I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include/bsoncxx/v_noabi
+-I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include/bsoncxx/v_noabi/bsoncxx/third_party/mnmlstc
