@@ -1,3 +1,6 @@
+#ifndef __MONGO_H__
+#define __MONGO_H__
+
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
@@ -14,7 +17,8 @@ public:
   int removeUserByUsername(const std::string& username);
   int addFriendByUsername(const std::string& username, const std::string& friendUsername);
  int removeFriendByUsername(const std::string& username, const std::string& friendUsername);
-  int addRestaurant(const std::string& name, const std::string& location, int price_range, double stars, const std::string& website_url);
+
+  int addRestaurant(const std::string& name, const std::string& location, int price_range, double stars, const std::string& website_url, const std::string& image_url, const std::vector<std::string>& tags);
   int addRestaurantToUserList(const std::string& username, const std::string& restaurantName, double rating);
   int removeRestaurantFromUserList(const std::string& username, const std::string& restaurantName);
   int updateRestaurantRatingInUserList(const std::string& username, const std::string& restaurantName, double newRating);
@@ -31,6 +35,4 @@ private:
 
 };
 
-
-
-
+#endif 

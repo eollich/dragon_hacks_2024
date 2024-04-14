@@ -189,7 +189,7 @@ std::optional<bsoncxx::oid> Mongo::findRestaurantByName(const std::string& name)
 }
 
 
-int Mongo::addRestaurant(const std::string& name, const std::string& location, int price_range, double stars, const std::string& website_url) {
+int Mongo::addRestaurant(const std::string& name, const std::string& location, int price_range, double stars, const std::string& website_url, const std::string& image_url, const std::vector<std::string>& tags) {
   auto restaurantIdOpt = findRestaurantByName(name);
   if (restaurantIdOpt.has_value()) {
     std::cout << "Restaurant already exists with ID: " << restaurantIdOpt->to_string() << std::endl;
@@ -203,6 +203,14 @@ int Mongo::addRestaurant(const std::string& name, const std::string& location, i
     builder.append(bsoncxx::builder::basic::kvp("price_range", price_range));
     builder.append(bsoncxx::builder::basic::kvp("stars", stars));
     builder.append(bsoncxx::builder::basic::kvp("website_url", website_url));
+    builder.append(bsoncxx::builder::basic::kvp("image_url", image_url));
+
+    // Add tags to the document
+    builder.append(bsoncxx::builder::basic::kvp("tags", [&](bsoncxx::builder::basic::sub_array sub_arr) {
+      for (const auto& tag : tags) {
+        sub_arr.append(tag);
+      }
+    }));
 
     auto result = restaurants.insert_one(builder.view());
     std::cout << "Restaurant added successfully." << std::endl;

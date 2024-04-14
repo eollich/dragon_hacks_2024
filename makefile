@@ -8,7 +8,7 @@ CCFLAGS=-I$(INCLUDE) -std=c++17 $(shell pkg-config --cflags libmongocxx)
 LDFLAGS=$(shell pkg-config --libs libmongocxx)
 
 
-SOURCES= mongo
+SOURCES= mongo populate_restaurants
 OBJECTS=$(foreach source,$(SOURCES),$(OBJ)/$(source).o)
 
 all: main
