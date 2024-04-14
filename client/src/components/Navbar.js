@@ -58,6 +58,9 @@ const Navbar = () => {
                 <CNavItem>
                   <CNavLink href="/swipe">Swipe</CNavLink>
                 </CNavItem>
+                <CNavItem>
+                  <CNavLink href="/want">WantVisit</CNavLink>
+                </CNavItem>
               <CNavItem>
                   <CButton onClick={handleDeleteAccount} color="danger">Delete Account</CButton>
                 </CNavItem>

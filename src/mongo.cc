@@ -264,13 +264,15 @@ int Mongo::addRestaurantToUserList(const std::string &username,
   }
 
   auto restaurantIdOpt = findRestaurantByName(restaurantName);
-  if (!restaurantIdOpt.has_value()) {
-    std::cerr << "Restaurant '" << restaurantName << "' does not exist."
-              << std::endl;
-    return 2; // Restaurant not found
-  }
+  //if (!restaurantIdOpt.has_value()) {
+  //  std::cerr << "Restaurant '" << restaurantName << "' does not exist."
+  //            << std::endl;
+  //  return 2; // Restaurant not found
+  //}
+
 
   try {
+    bsoncxx::oid oid(restaurantName); 
     auto filter = bsoncxx::builder::basic::document{};
     filter.append(bsoncxx::builder::basic::kvp("username", username));
 
@@ -281,7 +283,7 @@ int Mongo::addRestaurantToUserList(const std::string &username,
               "restaurants_visited",
               [&](bsoncxx::builder::basic::sub_document subdoc2) {
                 subdoc2.append(bsoncxx::builder::basic::kvp(
-                    "restaurant_id", restaurantIdOpt->to_string()));
+                    "restaurant_id", oid));
                 subdoc2.append(bsoncxx::builder::basic::kvp("rating", rating));
               }));
         }));

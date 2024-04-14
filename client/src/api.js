@@ -130,6 +130,28 @@ export const like = async(rid,token) => {
 export const dislike = async(rid) => {};
 
 
+export const getWant = async(token) => {
+  try {
+    const res = await axios.post('/getWantVisit', {token: token}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data;; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
+
+
+
 
 
 //(async () => {

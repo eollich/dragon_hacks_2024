@@ -220,7 +220,78 @@ void Server::setupRoutes(){
   });
 
 
+  CROW_ROUTE(app, "/getWantVisit").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
 
+    std::string token;
+    try{
+      token = x["token"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto user = getLoggedInUser(token);
+    if(!user){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
+    }
+
+    std::set<std::string> result;
+    try{
+    result = conn.getWantedRestaurants(user.value());
+    }catch(const std::exception e){
+      std::cerr << e.what() << std::endl;
+      return crow::response(400, crow::json::wvalue({{"error", "want visit error"}}));
+    }
+    crow::json::wvalue jsonResult;
+    size_t i = 0;
+    for (const std::string& value : result)
+    {
+        jsonResult[i]["value"] = value;
+        i++;
+    }
+    return crow::response(200, jsonResult);
+
+  });
+
+
+  CROW_ROUTE(app, "/getHaveVisit").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
+
+    std::string token;
+    try{
+      token = x["token"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto user = getLoggedInUser(token);
+    if(!user){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
+    }
+
+    std::set<std::string> result;
+    try{
+    result = conn.getVisitedRestaurants(user.value());
+    }catch(const std::exception e){
+      std::cerr << e.what() << std::endl;
+      return crow::response(400, crow::json::wvalue({{"error", "visited error"}}));
+    }
+    crow::json::wvalue jsonResult;
+    size_t i = 0;
+    for (const std::string& value : result)
+    {
+        jsonResult[i]["value"] = value;
+        i++;
+    }
+    return crow::response(200, jsonResult);
+
+  });
 
 
 }
