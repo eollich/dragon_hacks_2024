@@ -28,7 +28,7 @@ private:
   static mongocxx::instance inst;
   mongocxx::client client;
   mongocxx::database database;
-  mongocxx::collection userstoken, username;
+  mongocxx::collection users;
   mongocxx::collection restaurants;
   std::optional<bsoncxx::oid> findUserByUsername(const std::string& username);
   std::optional<bsoncxx::oid> findRestaurantByName(const std::string& name);
