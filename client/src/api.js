@@ -190,6 +190,43 @@ export const rate = async(rid,rating, token) => {
 
 
 
+export const view_v = async(username) => {
+  try {
+    const res = await axios.get(`/v/${username}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data;; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
+export const view_w = async(username) => {
+  try {
+    const res = await axios.get(`/w/${username}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data;; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
 
 
 

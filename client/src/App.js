@@ -14,6 +14,8 @@ import SignIn from './components/SignIn';
 import Register from './components/Register';
 import WantToVisit from './components/WantVisit';
 import VisitedRestaurants from './components/VisitedRestaurants';
+import ExternalRestaurant from './components/ExternalRestaurant';
+
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/want" element={<WantToVisit />} />
           <Route path="/visited" element={<VisitedRestaurants />} />
+          <Route path="/v/:username" element={<ExternalRestaurant type="v" />} />
+          <Route path="/w/:username" element={<ExternalRestaurant type="w" />} />
         </Routes>
       </div>
     </Router>
