@@ -1,9 +1,10 @@
 #include <mongo.h>
 #include <cstdlib>
 #include <populate_retaurants.h>
+#include <server.h>
 
 int main(){
-  Mongo mongo(std::getenv("URI"), "foodr");
+  //Mongo mongo(std::getenv("URI"), "foodr");
   //std::cout << mongo.addUser("eollich", "asdf") << std::endl;;
   //std::cout << mongo.addUser("nat", "123") << std::endl;;
   //mongo.addFriendByUsername("eollich", "nat");
@@ -19,10 +20,20 @@ int main(){
 
 
 
-  populate("json_data/", 201);
+  //populate("json_data/", 201);
 
 
+  Server server(60000);
+  server.setupRoutes();
+  server.run();
 
+ // crow::SimpleApp app;
+
+ // CROW_ROUTE(app, "/")([](){
+ //   return "Hello world";
+ // });
+
+ // app.port(18080).run();
 
   return 0;
 }

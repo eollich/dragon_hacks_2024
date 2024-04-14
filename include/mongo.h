@@ -22,12 +22,13 @@ public:
   int addRestaurantToUserList(const std::string& username, const std::string& restaurantName, double rating);
   int removeRestaurantFromUserList(const std::string& username, const std::string& restaurantName);
   int updateRestaurantRatingInUserList(const std::string& username, const std::string& restaurantName, double newRating);
+  bool login(std::string& username, std::string& password);
 
 private:
   static mongocxx::instance inst;
   mongocxx::client client;
   mongocxx::database database;
-  mongocxx::collection users;
+  mongocxx::collection userstoken, username;
   mongocxx::collection restaurants;
   std::optional<bsoncxx::oid> findUserByUsername(const std::string& username);
   std::optional<bsoncxx::oid> findRestaurantByName(const std::string& name);

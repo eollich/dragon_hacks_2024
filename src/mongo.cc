@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <exception>
 #include <mongo.h>
 #include <picosha2.h>
 
@@ -323,4 +324,22 @@ int Mongo::updateRestaurantRatingInUserList(const std::string& username, const s
     std::cerr << "An exception occurred while updating the restaurant rating: " << e.what() << std::endl;
     return 3; // Exception caught
   }
+}
+
+
+
+bool Mongo::login(std::string& username, std::string& password){
+  try{
+    std::string hashed_pass = hashPassword(password.c_str());
+    auto filter = bsoncxx::builder::basic::document{};
+    filter.append(bsoncxx::builder::basic::kvp("username", username));
+    filter.append(bsoncxx::builder::basic::kvp("password", hashed_pass));
+
+    auto result = users.find_one(filter.view());
+    return result ? true : false;
+  }catch(const std::exception& e){
+    std::cerr << "error trying to log in" << std::endl;
+    return false;
+  }
+
 }

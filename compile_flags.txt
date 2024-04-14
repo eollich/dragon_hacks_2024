@@ -4,3 +4,4 @@
 -I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include
 -I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include/bsoncxx/v_noabi
 -I/usr/local/Cellar/mongo-cxx-driver/3.10.1/include/bsoncxx/v_noabi/bsoncxx/third_party/mnmlstc
+-I/usr/local/Cellar/asio/1.28.1/include

@@ -5,10 +5,10 @@ BIN=bin
 INCLUDE=include
 LIB=lib
 CCFLAGS=-I$(INCLUDE) -std=c++17 $(shell pkg-config --cflags libmongocxx)
-LDFLAGS=$(shell pkg-config --libs libmongocxx)
+LDFLAGS=$(shell pkg-config --libs libmongocxx) -lpthread
 
 
-SOURCES= mongo populate_restaurants
+SOURCES= mongo populate_restaurants server
 OBJECTS=$(foreach source,$(SOURCES),$(OBJ)/$(source).o)
 
 all: main
