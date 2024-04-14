@@ -113,8 +113,12 @@ void Server::setupRoutes(){
 
     int removed = conn.removeUserByUsername(user.value());
     if(removed == 0){
-      if (users.find(token) != users.end()) {
-        users.erase(token);
+      for(auto it = users.begin(); it != users.end(); ) {
+        if (it->second == user.value()) {
+          it = users.erase(it);  
+        } else {
+          ++it;  
+        }
       }
       return crow::response(200, crow::json::wvalue({{"success", "account deleted"}}));
     }

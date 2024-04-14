@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 const getHome = async() => {
   try{
     const res = await axios.get("http://localhost:60000/");
@@ -12,16 +13,19 @@ const getHome = async() => {
 
 };
 
-const createUser = async(username, password) => {
+export const createUser = async(username, password) => {
   try {
-    const res = await axios.post('http://localhost:60000/createUser', {username: username, password:password}, {
+    const res = await axios.post('/createUser', {username: username, password:password}, {
       headers: {
         'Content-Type': 'application/json'
       }
     });
     console.log('Status:', res.status);
     console.log('Data:', res.data);
-    return res.data; 
+    if(res.status == 200){
+      return true;
+    }
+    return false;
   } catch (error) {
     console.error('Error:', error.res ? error.res.data : error.message);
     throw error; 
@@ -29,9 +33,9 @@ const createUser = async(username, password) => {
 };
 
 
-const deleteUser = async (token) => {
+export const deleteUser = async (token) => {
   try {
-    const res = await axios.post('http://localhost:60000/deleteUser', {
+    const res = await axios.post('/deleteUser', {
       token: token
     }, {
       headers: {
@@ -67,6 +71,8 @@ export const login = async(username, password) => {
     throw error; 
   }
 };
+
+
 
 
 
