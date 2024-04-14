@@ -6,8 +6,11 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/uri.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
 #include <string>
 #include <optional>
+#include <set>
+#include <crow.h>
 
 class Mongo{
 public:
@@ -20,9 +23,31 @@ public:
 
   int addRestaurant(const std::string& name, const std::string& location, int price_range, double stars, const std::string& website_url, const std::string& image_url, const std::vector<std::string>& tags);
   int addRestaurantToUserList(const std::string& username, const std::string& restaurantName, double rating);
+  int addRestaurantToVisitList(const std::string& username, const std::string& restaurantName);
   int removeRestaurantFromUserList(const std::string& username, const std::string& restaurantName);
   int updateRestaurantRatingInUserList(const std::string& username, const std::string& restaurantName, double newRating);
   bool login(std::string& username, std::string& password);
+
+
+  std::set<std::string> getVisitedRestaurants(const std::string& username);
+  std::set<std::string> getWantedRestaurants(const std::string& username);
+  std::set<std::string> getAllRestaurants();
+  std::string printRestaurantDetails(const std::string &id);
+
+
+  //TODO
+
+  //server
+  void logout(std::string);
+
+  //get retaurtsn user wants to visit
+  //get restaunt user has visited
+  //get all restaurants
+  //get users friends
+  //
+  //maybe search all?
+  //
+  //add wants to visit
 
 private:
   static mongocxx::instance inst;

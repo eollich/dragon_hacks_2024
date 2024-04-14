@@ -126,10 +126,107 @@ void Server::setupRoutes(){
     return crow::response(400, crow::json::wvalue({{"error", "could not delete account"}}));
   });
 
-  //int removeUserByUsername(const std::string& username);
+  CROW_ROUTE(app, "/getSwipeRestaurants").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
+
+    std::string token;
+    try{
+      token = x["token"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto user = getLoggedInUser(token);
+    if(!user){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
+    }
+
+    std::set<std::string> result;
+    try{
+    auto all_restaurants = conn.getAllRestaurants();
+    auto visited_restaurants = conn.getVisitedRestaurants(user.value());
+    auto wanted_restaurants = conn.getWantedRestaurants(user.value());
+    visited_restaurants.insert(wanted_restaurants.begin(), wanted_restaurants.end());
+    std::set_difference(all_restaurants.begin(), all_restaurants.end(), visited_restaurants.begin(), visited_restaurants.end(), std::inserter(result, result.begin()));
+      std::cout << all_restaurants.size() << std::endl;
+      std::cout << visited_restaurants.size() << std::endl;
+      std::cout << wanted_restaurants.size() << std::endl;
+
+    }catch(const std::exception e){
+      std::cerr << e.what() << std::endl;
+      return crow::response(400, crow::json::wvalue({{"error", "swipe curator error"}}));
+    }
+    crow::json::wvalue jsonResult;
+    size_t i = 0;
+    for (const std::string& value : result)
+    {
+        jsonResult[i]["value"] = value;
+        i++;
+    }
+    return crow::response(200, jsonResult);
+
+  });
+
+
+  CROW_ROUTE(app, "/getRestaurant").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
+
+    std::string rid;
+    try{
+      rid = x["rid"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto data = conn.printRestaurantDetails(rid);
+
+    return crow::response(200, data);
+
+  });
+
+
+
+  CROW_ROUTE(app, "/likeR").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
+
+    std::string rid;
+    std::string token;
+    try{
+      rid = x["rid"].s();
+      token = x["token"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto user = getLoggedInUser(token);
+    if(!user){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
+    }
+
+    auto val = conn.addRestaurantToVisitList(user.value(), rid);
+
+    if(val == 0) return crow::response(200);
+    return crow::response(400);
+
+  });
+
+
+
+
 
 }
 
 void Server::run(){
-  app.port(port).multithreaded().run();
+  app.port(port).run();
+  //react double calling will make this a pain
+  //app.port(port).multithreaded().run();
 }

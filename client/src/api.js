@@ -3,8 +3,8 @@ import axios from 'axios';
 const getHome = async() => {
   try{
     const res = await axios.get("http://localhost:60000/");
-    //console.log('Status:', res.status);
-    //console.log('Data:', res.data);
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
     return res.data; 
   }catch(error){
     console.error('Error:', error.res ? error.res.data : error.message);
@@ -72,6 +72,62 @@ export const login = async(username, password) => {
   }
 };
 
+export const getSwipeRestaurants = async(token) => {
+  try {
+    const res = await axios.post('/getSwipeRestaurants', {token: token}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
+export const getRestaurant = async(rid) => {
+  try {
+    const res = await axios.post('/getRestaurant', {rid: rid}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data;; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
+export const like = async(rid,token) => {
+  try {
+    console.log(rid);
+    console.log(token);
+    const res = await axios.post('/likeR', {rid: rid, token:token}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    return res.status;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+export const dislike = async(rid) => {};
 
 
 
