@@ -228,7 +228,29 @@ export const view_w = async(username) => {
   }
 };
 
+export const view_c = async (username, token) => {
+  try {
+    console.log(username);
+    console.log(token);
+    const res = await axios.post(`/c/${username}`, {
+      token: token
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if (res.status === 200) {
+      return res.data; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
 
 
 //(async () => {

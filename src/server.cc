@@ -381,22 +381,70 @@ void Server::setupRoutes() {
 
   CROW_ROUTE(app, "/w/<string>")
   ([&](const crow::request &req, std::string username) {
-        std::set<std::string> result;
+    std::set<std::string> result;
+    try {
+      result = conn.getWantedRestaurants(username);
+    } catch (const std::exception e) {
+      std::cerr << e.what() << std::endl;
+      return crow::response(
+          400, crow::json::wvalue({{"error", "want visit error"}}));
+    }
+    crow::json::wvalue jsonResult;
+    size_t i = 0;
+    for (const std::string &value : result) {
+      jsonResult[i]["value"] = value;
+      i++;
+    }
+    return crow::response(200, jsonResult);
+  });
+
+  CROW_ROUTE(app, "/c/<string>")
+      .methods(crow::HTTPMethod::Post)([this](const crow::request &req,
+                                              std::string username) {
+        auto x = crow::json::load(req.body);
+        if (!x) {
+          return crow::response(
+              400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+        }
+
+        std::string token;
         try {
-          result = conn.getWantedRestaurants(username);
-        } catch (const std::exception e) {
+          token = x["token"].s();
+        } catch (const std::exception &e) {
+          return crow::response(
+              400, crow::json::wvalue({{"error", "Invalid token in JSON"}}));
+        }
+
+        auto user = getLoggedInUser(token);
+        if (!user) {
+          return crow::response(
+              400, crow::json::wvalue({{"error", "invalid request"}}));
+        }
+
+        std::set<std::string> result1;
+        std::set<std::string> result2;
+        std::set<std::string> intersection;
+        try {
+          result1 = conn.getWantedRestaurants(user.value());
+          result2 = conn.getWantedRestaurants(username);
+          std::set_intersection(
+              result1.begin(), result1.end(), result2.begin(), result2.end(),
+              std::inserter(intersection, intersection.begin()));
+        } catch (const std::exception &e) {
           std::cerr << e.what() << std::endl;
           return crow::response(
-              400, crow::json::wvalue({{"error", "want visit error"}}));
+              400, crow::json::wvalue(
+                       {{"error", "Failed to fetch wanted restaurants"}}));
         }
+
         crow::json::wvalue jsonResult;
         size_t i = 0;
-        for (const std::string &value : result) {
+        for (const auto &value : intersection) {
           jsonResult[i]["value"] = value;
           i++;
         }
         return crow::response(200, jsonResult);
-  });
+      });
 }
 
 void Server::run() {

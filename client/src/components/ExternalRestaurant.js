@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // Import useParams
-import { view_v, view_w, getRestaurant } from '../api'; // Adjust API import
+import { view_v, view_w, view_c, getRestaurant } from '../api'; // Adjust API import
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ExternalCard from './ExternalCard'; // Assuming this is your card component
@@ -26,6 +26,8 @@ function ExternalRestaurant({ type }) {
         data = await view_v(username);
       } else if (type === "w") {
         data = await view_w(username);
+      } else if (type === "c"){
+        data = await view_c(username, localStorage.getItem('token'));
       }
       const restaurantPromises = data.map(async (item) => {
         const details = await getRestaurant(item.restaurant_id || item.value);

@@ -32,6 +32,7 @@ function App() {
           <Route path="/visited" element={<VisitedRestaurants />} />
           <Route path="/v/:username" element={<ExternalRestaurant type="v" />} />
           <Route path="/w/:username" element={<ExternalRestaurant type="w" />} />
+          <Route path="/c/:username" element={<ExternalRestaurant type="c" />} />
         </Routes>
       </div>
     </Router>
