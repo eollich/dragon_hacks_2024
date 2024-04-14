@@ -13,6 +13,7 @@ import Swipe from './components/Swipe';
 import SignIn from './components/SignIn';
 import Register from './components/Register';
 import WantToVisit from './components/WantVisit';
+import VisitedRestaurants from './components/VisitedRestaurants';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/register" element={<Register />} />
           <Route path="/want" element={<WantToVisit />} />
+          <Route path="/visited" element={<VisitedRestaurants />} />
         </Routes>
       </div>
     </Router>

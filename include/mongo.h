@@ -29,10 +29,15 @@ public:
   bool login(std::string& username, std::string& password);
 
 
-  std::set<std::string> getVisitedRestaurants(const std::string& username);
+  //std::set<std::string> getVisitedRestaurants(const std::string& username);
+  //bsoncxx::document::value getVisitedRestaurants(const std::string& username);
+  //nlohmann::json getVisitedRestaurants(const std::string& username);
+  std::vector<std::pair<std::string, double>> getVisitedRestaurants(const std::string &username);
   std::set<std::string> getWantedRestaurants(const std::string& username);
   std::set<std::string> getAllRestaurants();
   std::string printRestaurantDetails(const std::string &id);
+  std::set<std::string> getVisitedRestaurantsId(const std::string &username);
+  int moveRestaurantToVisited(const std::string& username, const std::string& restaurantId, double rating);
 
 
   //TODO

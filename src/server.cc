@@ -147,7 +147,7 @@ void Server::setupRoutes(){
     std::set<std::string> result;
     try{
     auto all_restaurants = conn.getAllRestaurants();
-    auto visited_restaurants = conn.getVisitedRestaurants(user.value());
+    auto visited_restaurants = conn.getVisitedRestaurantsId(user.value());
     auto wanted_restaurants = conn.getWantedRestaurants(user.value());
     visited_restaurants.insert(wanted_restaurants.begin(), wanted_restaurants.end());
     std::set_difference(all_restaurants.begin(), all_restaurants.end(), visited_restaurants.begin(), visited_restaurants.end(), std::inserter(result, result.begin()));
@@ -275,7 +275,7 @@ void Server::setupRoutes(){
       return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
     }
 
-    std::set<std::string> result;
+    std::vector<std::pair<std::string, double>> result;
     try{
     result = conn.getVisitedRestaurants(user.value());
     }catch(const std::exception e){
@@ -284,14 +284,63 @@ void Server::setupRoutes(){
     }
     crow::json::wvalue jsonResult;
     size_t i = 0;
-    for (const std::string& value : result)
-    {
-        jsonResult[i]["value"] = value;
-        i++;
+    for (const auto& pair : result) {
+      // Access the restaurant ID and rating from each pair
+      jsonResult[i]["restaurant_id"] = pair.first;
+      jsonResult[i]["rating"] = pair.second;
+      ++i;
     }
     return crow::response(200, jsonResult);
 
   });
+
+
+  CROW_ROUTE(app, "/rate").methods(crow::HTTPMethod::Post)([this](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x) {
+      return crow::response(400, crow::json::wvalue({{"error", "Invalid JSON"}}));
+    }
+
+    std::string rid;
+    double rating;
+    std::string token;
+    try{
+      rid = x["rid"].s();
+      rating = x["rating"].d();
+      token = x["token"].s();
+    }catch(const std::exception& e){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid json key values"}}));
+    }
+
+    auto user = getLoggedInUser(token);
+    if(!user){
+      return crow::response(400, crow::json::wvalue({{"error", "invalid request"}}));
+    }
+
+    auto val = conn.moveRestaurantToVisited(user.value(), rid, rating);
+
+    if(val == 0) return crow::response(200);
+    return crow::response(400);
+
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

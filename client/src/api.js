@@ -127,6 +127,7 @@ export const like = async(rid,token) => {
     throw error; 
   }
 };
+
 export const dislike = async(rid) => {};
 
 
@@ -148,6 +149,45 @@ export const getWant = async(token) => {
     throw error; 
   }
 };
+
+
+export const getVisited = async(token) => {
+  try {
+    const res = await axios.post('/getHaveVisit', {token: token}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    console.log('Data:', res.data);
+    if(res.status==200){
+      return res.data;; 
+    }
+    return null;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
+export const rate = async(rid,rating, token) => {
+  try {
+    console.log(rid);
+    console.log(rating);
+    console.log(token);
+    const res = await axios.post('/rate', {rid: rid, rating: rating, token:token}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('Status:', res.status);
+    return res.status;
+  } catch (error) {
+    console.error('Error:', error.res ? error.res.data : error.message);
+    throw error; 
+  }
+};
+
 
 
 

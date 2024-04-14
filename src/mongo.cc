@@ -1,3 +1,7 @@
+#include "json.hpp"
+#include <bsoncxx/builder/stream/array.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/json.hpp>
 #include <crow.h>
 #include <cstdlib>
 #include <exception>
@@ -39,8 +43,8 @@ int Mongo::addUser(const char *username, const char *password) {
 
     auto builder = bsoncxx::builder::basic::document{};
     builder.append(bsoncxx::builder::basic::kvp("username", username));
-    builder.append(bsoncxx::builder::basic::kvp(
-        "password", hashPassword(password))); 
+    builder.append(
+        bsoncxx::builder::basic::kvp("password", hashPassword(password)));
 
     builder.append(bsoncxx::builder::basic::kvp(
         "friends", [](bsoncxx::builder::basic::sub_array sub_arr) {}));
@@ -104,7 +108,7 @@ Mongo::findUserByUsername(const std::string &username) {
   } catch (const std::exception &e) {
     std::cerr << "Error finding user by username: " << e.what() << std::endl;
   }
-  return {}; 
+  return {};
 }
 
 int Mongo::addFriendByUsername(const std::string &username,
@@ -264,15 +268,14 @@ int Mongo::addRestaurantToUserList(const std::string &username,
   }
 
   auto restaurantIdOpt = findRestaurantByName(restaurantName);
-  //if (!restaurantIdOpt.has_value()) {
-  //  std::cerr << "Restaurant '" << restaurantName << "' does not exist."
-  //            << std::endl;
-  //  return 2; // Restaurant not found
-  //}
-
+  // if (!restaurantIdOpt.has_value()) {
+  //   std::cerr << "Restaurant '" << restaurantName << "' does not exist."
+  //             << std::endl;
+  //   return 2; // Restaurant not found
+  // }
 
   try {
-    bsoncxx::oid oid(restaurantName); 
+    bsoncxx::oid oid(restaurantName);
     auto filter = bsoncxx::builder::basic::document{};
     filter.append(bsoncxx::builder::basic::kvp("username", username));
 
@@ -282,8 +285,8 @@ int Mongo::addRestaurantToUserList(const std::string &username,
           subdoc.append(bsoncxx::builder::basic::kvp(
               "restaurants_visited",
               [&](bsoncxx::builder::basic::sub_document subdoc2) {
-                subdoc2.append(bsoncxx::builder::basic::kvp(
-                    "restaurant_id", oid));
+                subdoc2.append(
+                    bsoncxx::builder::basic::kvp("restaurant_id", oid));
                 subdoc2.append(bsoncxx::builder::basic::kvp("rating", rating));
               }));
         }));
@@ -313,7 +316,7 @@ int Mongo::addRestaurantToVisitList(const std::string &username,
   }
 
   try {
-    bsoncxx::oid oid(restaurantId); 
+    bsoncxx::oid oid(restaurantId);
 
     auto filter = bsoncxx::builder::basic::document{};
     filter.append(bsoncxx::builder::basic::kvp("username", username));
@@ -321,8 +324,8 @@ int Mongo::addRestaurantToVisitList(const std::string &username,
     auto update = bsoncxx::builder::basic::document{};
     update.append(bsoncxx::builder::basic::kvp(
         "$push", [&](bsoncxx::builder::basic::sub_document subdoc) {
-          subdoc.append(bsoncxx::builder::basic::kvp(
-              "restaurants_want_visit",oid));
+          subdoc.append(
+              bsoncxx::builder::basic::kvp("restaurants_want_visit", oid));
         }));
 
     auto result = users.update_one(filter.view(), update.view());
@@ -438,26 +441,29 @@ bool Mongo::login(std::string &username, std::string &password) {
   }
 }
 
-std::set<std::string>
+
+std::vector<std::pair<std::string, double>>
 Mongo::getVisitedRestaurants(const std::string &username) {
-  std::set<std::string> visited_restaurants;
-  try {
-    auto query = bsoncxx::builder::stream::document{}
+    std::vector<std::pair<std::string, double>> visited_restaurants_info;
+    try {
+        auto query = bsoncxx::builder::stream::document{}
                  << "username" << username
                  << bsoncxx::builder::stream::finalize;
-    auto userDoc = users.find_one(query.view());
-    if (userDoc) {
-      auto elements = userDoc->view()["restaurants_visited"].get_array().value;
-      for (auto &element : elements) {
-        visited_restaurants.insert(element.get_oid().value.to_string());
-           std::cout << element.get_oid().value.to_string() << std::endl;
-      }
+        auto userDoc = users.find_one(query.view());
+        if (userDoc) {
+            auto elements = userDoc->view()["restaurants_visited"].get_array().value;
+            for (auto &element : elements) {
+                // Extract the restaurant ID and rating from each subdocument
+                auto restaurant_id = element["restaurant_id"].get_oid().value.to_string();
+                auto rating = element["rating"].get_double().value;
+                visited_restaurants_info.emplace_back(restaurant_id, rating);
+            }
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Failed to fetch visited restaurants: " << e.what()
+                  << std::endl;
     }
-  } catch (const std::exception &e) {
-    std::cerr << "Failed to fetch visited restaurants: " << e.what()
-              << std::endl;
-  }
-  return visited_restaurants;
+    return visited_restaurants_info;
 }
 
 std::set<std::string> Mongo::getWantedRestaurants(const std::string &username) {
@@ -516,4 +522,88 @@ std::string Mongo::printRestaurantDetails(const std::string &id) {
   }
 
   return "";
+}
+
+std::set<std::string>
+Mongo::getVisitedRestaurantsId(const std::string &username) {
+  std::set<std::string> visited_restaurants;
+  try {
+    auto query = bsoncxx::builder::stream::document{}
+                 << "username" << username
+                 << bsoncxx::builder::stream::finalize;
+    auto userDoc = users.find_one(query.view());
+    if (userDoc) {
+      auto elements = userDoc->view()["restaurants_visited"].get_array().value;
+      for (auto &element : elements) {
+        // Assume each element is a document with an 'restaurant_id' field which
+        // is an ObjectId
+        visited_restaurants.insert(
+            element["restaurant_id"].get_oid().value.to_string());
+      }
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Failed to fetch visited restaurants: " << e.what()
+              << std::endl;
+  }
+  return visited_restaurants;
+}
+
+int Mongo::moveRestaurantToVisited(const std::string &username,
+                                   const std::string &restaurantId,
+                                   double rating) {
+  auto userIdOpt = findUserByUsername(username);
+  if (!userIdOpt.has_value()) {
+    std::cerr << "User '" << username << "' does not exist." << std::endl;
+    return 1; // User not found
+  }
+
+  try {
+    bsoncxx::oid oid(restaurantId);
+
+    auto filterPull = bsoncxx::builder::basic::document{};
+    filterPull.append(bsoncxx::builder::basic::kvp("username", username));
+
+    auto updatePull = bsoncxx::builder::basic::document{};
+    updatePull.append(bsoncxx::builder::basic::kvp(
+        "$pull", [&](bsoncxx::builder::basic::sub_document subdoc) {
+          subdoc.append(
+              bsoncxx::builder::basic::kvp("restaurants_want_visit", oid));
+        }));
+
+    auto resultPull = users.update_one(filterPull.view(), updatePull.view());
+    if (!resultPull || resultPull->modified_count() == 0) {
+      std::cerr << "Failed to remove restaurant from want to visit list."
+                << std::endl;
+      return 2; // Failed to pull
+    }
+
+    auto filterPush = bsoncxx::builder::basic::document{};
+    filterPush.append(bsoncxx::builder::basic::kvp("username", username));
+
+    auto updatePush = bsoncxx::builder::basic::document{};
+    updatePush.append(bsoncxx::builder::basic::kvp(
+        "$push", [&](bsoncxx::builder::basic::sub_document subdoc) {
+          subdoc.append(bsoncxx::builder::basic::kvp(
+              "restaurants_visited",
+              [&](bsoncxx::builder::basic::sub_document subdoc2) {
+                subdoc2.append(
+                    bsoncxx::builder::basic::kvp("restaurant_id", oid));
+                subdoc2.append(bsoncxx::builder::basic::kvp("rating", rating));
+              }));
+        }));
+
+    auto resultPush = users.update_one(filterPush.view(), updatePush.view());
+    if (resultPush && resultPush->modified_count() > 0) {
+      std::cout << "Restaurant moved to visited list successfully."
+                << std::endl;
+      return 0; // Success
+    } else {
+      std::cout << "Failed to add restaurant to visited list." << std::endl;
+      return 3; // Failed to push
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "An exception occurred while moving restaurant between lists: "
+              << e.what() << std::endl;
+    return 4; // Exception caught
+  }
 }
